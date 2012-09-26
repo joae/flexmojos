@@ -116,7 +116,131 @@ public class MavenUtils
 
         throw new MojoFailureException( "File " + fileName + " not found" );
     }
+    
+    /**
+     * Use the resolver to resolve the given artifact in the local or remote repositories.
+     * 
+     * @param project Active project
+     * @param artifact Artifact to be resolved
+     * @param resolver ArtifactResolver to use for resolving the artifact
+     * @param localRepository ArtifactRepository
+     * @param remoteRepositories List of remote artifact repositories
+     * @throws MojoExecutionException thrown if an exception occured during artifact resolving
+     * @return resolved artifact
+     
+    @SuppressWarnings( "unchecked" )
+    public static Artifact resolveArtifact( MavenProject project, Artifact artifact, ArtifactResolver resolver,
+                                            ArtifactRepository localRepository, List remoteRepositories )
+        throws MojoExecutionException
+    {
+        try
+        {
+            artifact = project.replaceWithActiveArtifact( artifact );
+            if ( !artifact.isResolved() )
+            {
+                resolver.resolve( artifact, remoteRepositories, localRepository );
+            }
+            return artifact;
+        }
+        catch ( AbstractArtifactResolutionException e )
+        {
+            throw new MojoExecutionException( e.getMessage(), e );
+        }
+    }
+	*/
+    
+    /**
+     * Get dependency artifacts for a project using the local and remote repositories to resolve the artifacts
+     * 
+     * @param project maven project
+     * @param resolver artifact resolver
+     * @param localRepository artifact repository
+     * @param remoteRepositories List of remote repositories
+     * @param artifactMetadataSource artifactMetadataSource
+     * @param artifactFactory TODO
+     * @return all dependencies from the project
+     * @throws MojoExecutionException thrown if an exception occured during artifact resolving
+     
+    @SuppressWarnings( "unchecked" )
+    public static Set<Artifact> getDependencyArtifacts( MavenProject project, ArtifactResolver resolver,
+                                                        ArtifactRepository localRepository, List remoteRepositories,
+                                                        ArtifactMetadataSource artifactMetadataSource,
+                                                        ArtifactFactory artifactFactory )
+        throws MojoExecutionException
+    {
+        Set<Artifact> artifacts = project.getDependencyArtifacts();
+        if ( artifacts == null )
+        {
+            try
+            {
+                artifacts = project.createArtifacts( artifactFactory, null, null );
+            }
+            catch ( InvalidDependencyVersionException e )
+            {
+                throw new MojoExecutionException( e.getMessage(), e );
+            }
+            project.setDependencyArtifacts( artifacts );
+        }
 
+        ArtifactResolutionResult arr;
+        try
+        {
+            arr =
+                resolver.resolveTransitively( project.getDependencyArtifacts(), project.getArtifact(),
+                                              remoteRepositories, localRepository, artifactMetadataSource );
+        }
+        catch ( AbstractArtifactResolutionException e )
+        {
+            throw new MojoExecutionException( e.getMessage(), e );
+        }
+
+        Set<Artifact> result = arr.getArtifacts();
+
+        // ## 6/18/09 StoneRiver Change to resolve RELEASE Artifact version ##
+        for ( Artifact artifact : result )
+        {
+            if ( artifact.getVersion().equals( Artifact.RELEASE_VERSION ) )
+            {
+                getReleaseVersion( artifact, localRepository, remoteRepositories, artifactMetadataSource );
+            }
+        }
+
+        return result;
+
+    }
+    */
+
+    /**
+     * Get the Release version for the Artifact.
+     * 
+     * @param artifact The artifact to update with the release version.
+     * @param localRepository artifact repository
+     * @param remoteRepositories List of remote repositories
+     * @param artifactMetadataSource artifactMetadataSource
+     * @throws MojoExecutionException thrown if an exception occured during artifact resolving
+     
+    @SuppressWarnings( "unchecked" )
+    private static void getReleaseVersion( Artifact artifact, ArtifactRepository localRepository,
+                                           List remoteRepositories, ArtifactMetadataSource artifactMetadataSource )
+        throws MojoExecutionException
+    {
+        try
+        {
+            List<ArtifactVersion> artifactVersions =
+                artifactMetadataSource.retrieveAvailableVersions( artifact, localRepository, remoteRepositories );
+            if ( artifactVersions != null && !artifactVersions.isEmpty() )
+            {
+                ArtifactVersion release = artifactVersions.get( artifactVersions.size() - 1 );
+                artifact.setBaseVersion( release.toString() );
+                artifact.setVersion( release.toString() );
+            }
+        }
+        catch ( ArtifactMetadataRetrievalException ex )
+        {
+            throw new MojoExecutionException( "Error retrieving release version for artifact: " + artifact.getId(), ex );
+        }
+    }
+	*/
     /**
      * Returns the file reference to the fonts file. Depending on the os, the correct fonts.ser file is used. The fonts
      * file is copied to the build directory.

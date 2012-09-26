@@ -1,42 +1,34 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!--
-
-    Flexmojos is a set of maven goals to allow maven users to compile, optimize and test Flex SWF, Flex SWC, Air SWF and Air SWC.
-    Copyright (C) 2008-2012  Marvin Froeder <marvin@flexmojos.net>
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
--->
 <actionScriptProperties 
-        mainApplicationPath="$mainApplication" 
-        version="3"
+        mainApplicationPath="$mainApplication"
+#if($projectUUID)
+		projectUUID="$projectUUID"
+#end
+        version="10"
         >
 
-    <compiler 
-            additionalCompilerArguments="$!additionalCompilerArguments" 
-            copyDependentFiles="true" 
-            enableModuleDebug="true" 
+    <compiler
+            additionalCompilerArguments="$!additionalCompilerArguments"
+            autoRSLOrdering="true"
+            copyDependentFiles="true"
+            fteInMXComponents="false" 
             generateAccessible="$accessible" 
-            htmlExpressInstall="true" 
-            htmlGenerate="$generateHtmlWrapper" 
-            htmlHistoryManagement="true" 
-            htmlPlayerVersion="$targetPlayer" 
-            htmlPlayerVersionCheck="true" 
-            outputFolderPath="$flexBuilderOutputFolderPath" 
+            htmlExpressInstall="$htmlExpressInstall" 
+            htmlGenerate="$htmlGenerate" 
+            htmlHistoryManagement="$htmlHistoryManagement"
+            htmlPlayerVersionCheck="$htmlPlayerVersionCheck"
+			includeNetmonSwc="false"
+            outputFolderPath="$ideOutputFolderPath" 
+            removeUnusedRSL="true"
             sourceFolderPath="$mainSources" 
-            strict="$strict" 
-            useApolloConfig="$useApolloConfig" 
+            strict="$strict"
+#if($useApolloConfig)
+			targetPlayerVersion="0.0.0"
+#else
+			targetPlayerVersion="$targetPlayer"
+#end
+            useApolloConfig="$useApolloConfig"
+            useDebugRSLSwfs="true"
             verifyDigests="$verifyDigests" 
             warn="$showWarnings"
             >
@@ -53,45 +45,73 @@
 
         <libraryPath
                 defaultLinkType="$libraryPathDefaultLinkType">
-
+			
 #foreach ($artifact in $dependencies)
 			<!-- artifact: $artifact -->
-            <libraryPathEntry 
-                    kind="3" 
-                    linkType="1" 
-                    path="$artifact.getFile().getPath().replaceAll('\\', '/')"
-#if ($artifact.getSourceAttachment())
-                    sourcepath="$artifact.getSourceAttachment().getPath().replaceAll('\\', '/')"
+            <libraryPathEntry
+#if($artifact.getScope() == "rsl")
+					autoExtract="true"
+					rslUrl="$artifact.getRslUrl('swf')"
+#end 
+                    kind="$artifact.getKindId()" 
+                    linkType="$artifact.getLinkTypeId()" 
+                    path="$artifact.getPath()"
+#if($artifact.getSourcePath())
+                    sourcepath="$artifact.getSourcePath()"
 #end
                     useDefaultLinkType="false"
                     />
 
 #end
+			<libraryPathEntry kind="4" path="">
+				<modifiedEntries>
+#foreach ($modified in $sdkMods)
+#if ($modified.getLinkTypeId() == 4)
+					<libraryPathEntry
+						kind="3"
+						linkType="$modified.getLinkTypeId()"
+						path="$modified.getPath()"
+						useDefaultLinkType="false">
+						<crossDomainRsls>
+							<crossDomainRslEntry autoExtract="true" policyFileUrl="$modified.getPolicyFileUrl()" rslUrl="$modified.getRslUrl('swz')" />
+							<crossDomainRslEntry autoExtract="true" policyFileUrl="$modified.getPolicyFileUrl()" rslUrl="$modified.getRslUrl('swf')" />
+						</crossDomainRsls>
+					</libraryPathEntry>
+#else
+					<libraryPathEntry
+						kind="3"
+						linkType="$modified.getLinkTypeId()"
+						path="$modified.getPath()"
+#if ($modified.getLinkTypeId() == 3)
+						autoExtract="true"
+						rslUrl="$modified.getRslUrl('swf')"
+#end
+						useDefaultLinkType="false" />
+#end
+#end
+				</modifiedEntries>
+				<excludedEntries>
+					<libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/flex.swc" useDefaultLinkType="false"/>
+#foreach ($exclude in $sdkExcludes)
+					<libraryPathEntry kind="3" linkType="1" path="$exclude.getPath()" useDefaultLinkType="false" />
+#end
+				</excludedEntries>
+			</libraryPathEntry>
+		</libraryPath>
 
-## workaround to get player global
-	      <libraryPathEntry kind="4" path="">
-	        <excludedEntries>
-	          <libraryPathEntry kind="1" linkType="1" path="${PROJECT_FRAMEWORKS}/locale/{locale}"/>
-	          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/flex.swc" useDefaultLinkType="false"/>
-	          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/qtp.swc" useDefaultLinkType="false"/>
-	          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/rpc.swc" useDefaultLinkType="false"/>
-	          <libraryPathEntry kind="3" linkType="4" path="${PROJECT_FRAMEWORKS}/libs/framework.swc" useDefaultLinkType="true">
-	            <crossDomainRsls>
-	              <crossDomainRslEntry autoExtract="true" policyFileUrl="" rslUrl="framework_3.1.0.2710.swz"/>
-	              <crossDomainRslEntry autoExtract="true" policyFileUrl="" rslUrl="framework_3.1.0.2710.swf"/>
-	            </crossDomainRsls>
-	          </libraryPathEntry>
-	          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/datavisualization.swc" useDefaultLinkType="false"/>
-	          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/automation.swc" useDefaultLinkType="false"/>
-	          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/automation_dmv.swc" useDefaultLinkType="false"/>
-	          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/automation_flashflexkit.swc" useDefaultLinkType="false"/>
-	          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/utilities.swc" useDefaultLinkType="false"/>
-	          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/automation_agent.swc" useDefaultLinkType="false"/>
-	        </excludedEntries>
-	      </libraryPathEntry>
-        </libraryPath>
 
-        <sourceAttachmentPath/>
+        <sourceAttachmentPath>
+#foreach ($artifact in $dependencies)
+#if ($artifact.getSourcePath())
+            <sourceAttachmentPathEntry
+                kind="3"
+                linkType="$artifact.getLinkType()"
+                path="$artifact.getPath()"
+                sourcepath="$artifact.getSourcePath()"
+                useDefaultLinkType="false" />
+#end 
+#end        
+        </sourceAttachmentPath>
 
     </compiler>
 
@@ -103,12 +123,44 @@
 #end
     </applications>
 
-    <modules/>
-
+    <modules>
+#foreach($module in $moduleFiles)
+		<module application="$mainSources/$mainApplication" 
+			destPath="$module.replace('mxml', 'swf')" 
+			optimize="true" 
+			sourcePath="$mainSources/$module"/>
+#end
+    </modules>
+    
     <buildCSSFiles>
 #foreach( $cssfile in $cssfiles )
-        <buildCSSFileEntry destPath="bin-debug" sourcePath="$cssfile"/>
+		<buildCSSFileEntry destPath="$ideOutputFolderPath" sourcePath="$cssfile" />
 #end
     </buildCSSFiles>
+    
+  <flashCatalyst validateFlashCatalystCompatibility="false"/>
+  
+#if ( $mobileProject )
+  
+  <buildTargets>
+    <buildTarget airDownloadURL="" androidSettingsVersion="1" buildTargetName="com.adobe.flexide.multiplatform.android.platform">
+      <airSettings airCertificatePath="" airTimestamp="true" anePathSet="false" version="1">
+        <airExcludes/>
+        <anePaths/>
+      </airSettings>
+      <multiPlatformSettings enabled="true" includePlatformLibs="false" platformID="com.adobe.flexide.multiplatform.android.platform" version="2"/>
+      <actionScriptSettings version="1"/>
+    </buildTarget>
+    <buildTarget buildTargetName="default">
+      <airSettings airCertificatePath="" airTimestamp="true" anePathSet="false" version="1">
+        <airExcludes/>
+        <anePaths/>
+      </airSettings>
+      <multiPlatformSettings enabled="false" includePlatformLibs="false" platformID="default" version="2"/>
+      <actionScriptSettings version="1"/>
+    </buildTarget>
+  </buildTargets>
+
+#end
 
 </actionScriptProperties>

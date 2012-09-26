@@ -24,7 +24,7 @@
   <parent>
     <groupId>net.flexmojos.oss</groupId>
     <artifactId>flexmojos-parent</artifactId>
-    <version>5.1-beta-SNAPSHOT</version>
+    <version>5.1-vostu-SNAPSHOT</version>
   </parent>
 
   <artifactId>flexmojos-maven-plugin</artifactId>
@@ -276,6 +276,11 @@
       <artifactId>commons-httpclient</artifactId>
     </dependency>
     <dependency>
+       <groupId>org.apache.maven.plugins</groupId>
+       <artifactId>maven-eclipse-plugin</artifactId>
+       <type>maven-plugin</type>
+    </dependency>
+    <dependency>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-source-plugin</artifactId>
       <type>maven-plugin</type>
@@ -335,6 +340,16 @@
           <groupId>org.codehaus.plexus</groupId>
         </exclusion>
       </exclusions>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.apache.velocity</groupId>
+      <artifactId>velocity</artifactId>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-velocity</artifactId>    
     </dependency>
 
     <dependency>

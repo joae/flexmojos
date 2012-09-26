@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<actionScriptProperties 
+        mainApplicationPath="$mainApplication"
+#if($projectUUID)
+		projectUUID="$projectUUID"
+#end
+        version="$ideVersion"
+        >
+
+    <compiler
+            additionalCompilerArguments="$!additionalCompilerArguments"
+            autoRSLOrdering="true"
+            copyDependentFiles="true"
+            fteInMXComponents="false" 
+            generateAccessible="$accessible" 
+            htmlExpressInstall="$htmlExpressInstall" 
+            htmlGenerate="$htmlGenerate" 
+            htmlHistoryManagement="$htmlHistoryManagement"
+            htmlPlayerVersionCheck="$htmlPlayerVersionCheck"
+			includeNetmonSwc="false"
+            outputFolderPath="$ideOutputFolderPath" 
+            removeUnusedRSL="true"
+            sourceFolderPath="$mainSources" 
+            strict="$strict"
+#if($useApolloConfig)
+			targetPlayerVersion="0.0.0"
+#else
+			targetPlayerVersion="$targetPlayer"
+#end
+            useApolloConfig="$useApolloConfig"
+            useDebugRSLSwfs="true"
+            verifyDigests="$verifyDigests" 
+            warn="$showWarnings"
+            >
+
+        <compilerSourcePath>
+#foreach ($path in $sources)
+            <compilerSourcePathEntry 
+                    kind="1" 
+                    linkType="1" 
+                    path="$path"
+                    />
+#end 
+        </compilerSourcePath>
+
+        <libraryPath
+                defaultLinkType="$libraryPathDefaultLinkType">
+			
+#foreach ($artifact in $dependencies)
+			<!-- artifact: $artifact -->
+            <libraryPathEntry
+#if($artifact.getScope() == "rsl")
+					autoExtract="true"
+					rslUrl="$artifact.getRslUrl('swf')"
+#end 
+                    kind="$artifact.getKindId()" 
+                    linkType="$artifact.getLinkTypeId()" 
+                    path="$artifact.getPath()"
+#if($artifact.getSourcePath())
+                    sourcepath="$artifact.getSourcePath()"
+#end
+                    useDefaultLinkType="false"
+                    />
+
+#end
+			<libraryPathEntry kind="4" path="">
+				<modifiedEntries>
+#foreach ($modified in $sdkMods)
+#if ($modified.getLinkTypeId() == 4)
+					<libraryPathEntry
+						kind="3"
+						linkType="$modified.getLinkTypeId()"
+						path="$modified.getPath()"
+						useDefaultLinkType="false">
+						<crossDomainRsls>
+							<crossDomainRslEntry autoExtract="true" policyFileUrl="$modified.getPolicyFileUrl()" rslUrl="$modified.getRslUrl('swz')" />
+							<crossDomainRslEntry autoExtract="true" policyFileUrl="$modified.getPolicyFileUrl()" rslUrl="$modified.getRslUrl('swf')" />
+						</crossDomainRsls>
+					</libraryPathEntry>
+#else
+					<libraryPathEntry
+						kind="3"
+						linkType="$modified.getLinkTypeId()"
+						path="$modified.getPath()"
+#if ($modified.getLinkTypeId() == 3)
+						autoExtract="true"
+						rslUrl="$modified.getRslUrl('swf')"
+#end
+						useDefaultLinkType="false" />
+#end
+#end
+				</modifiedEntries>
+				<excludedEntries>
+					<libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/flex.swc" useDefaultLinkType="false"/>
+#foreach ($exclude in $sdkExcludes)
+					<libraryPathEntry kind="3" linkType="1" path="$exclude.getPath()" useDefaultLinkType="false" />
+#end
+				</excludedEntries>
+			</libraryPathEntry>
+		</libraryPath>
+
+
+        <sourceAttachmentPath>
+#foreach ($artifact in $dependencies)
+#if ($artifact.getSourcePath())
+            <sourceAttachmentPathEntry
+                kind="3"
+                linkType="$artifact.getLinkType()"
+                path="$artifact.getPath()"
+                sourcepath="$artifact.getSourcePath()"
+                useDefaultLinkType="false" />
+#end 
+#end        
+        </sourceAttachmentPath>
+
+    </compiler>
+
+    <applications>
+#foreach ($application in $applications)
+        <application 
+                path="$application"
+                />
+#end
+    </applications>
+
+    <modules>
+#foreach($module in $moduleFiles)
+		<module application="$mainSources/$mainApplication" 
+			destPath="$module.replace('mxml', 'swf')" 
+			optimize="true" 
+			sourcePath="$mainSources/$module"/>
+#end
+    </modules>
+    
+    <buildCSSFiles>
+#foreach( $cssfile in $cssfiles )
+		<buildCSSFileEntry destPath="$ideOutputFolderPath" sourcePath="$cssfile" />
+#end
+    </buildCSSFiles>
+    
+  <flashCatalyst validateFlashCatalystCompatibility="false"/>
+  
+#if ( $mobileProject )
+  
+  <buildTargets>
+    <buildTarget airDownloadURL="" androidSettingsVersion="1" buildTargetName="com.adobe.flexide.multiplatform.android.platform">
+      <airSettings airCertificatePath="" airTimestamp="true" anePathSet="false" version="1">
+        <airExcludes/>
+        <anePaths/>
+      </airSettings>
+      <multiPlatformSettings enabled="true" includePlatformLibs="false" platformID="com.adobe.flexide.multiplatform.android.platform" version="2"/>
+      <actionScriptSettings version="1"/>
+    </buildTarget>
+    <buildTarget buildTargetName="default">
+      <airSettings airCertificatePath="" airTimestamp="true" anePathSet="false" version="1">
+        <airExcludes/>
+        <anePaths/>
+      </airSettings>
+      <multiPlatformSettings enabled="false" includePlatformLibs="false" platformID="default" version="2"/>
+      <actionScriptSettings version="1"/>
+    </buildTarget>
+  </buildTargets>
+
+#end
+
+</actionScriptProperties>
