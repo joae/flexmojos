@@ -186,6 +186,7 @@ public class FlexbuilderMojo
      * @parameter
      */
     protected Boolean mobileProject;
+	
 
     /* Start Duplicated */
 
@@ -612,6 +613,11 @@ public class FlexbuilderMojo
      * @parameter default-value="true"
      */
     protected boolean htmlPlayerVersionCheck;
+	
+	/**
+     * Specifies whether this project has an ANE dependencies
+     */
+    protected Boolean hasANE = false;
 
     /* Internal Properties */
 
@@ -991,6 +997,7 @@ public class FlexbuilderMojo
         context.put( "libraryPathDefaultLinkType", getLibraryPathDefaultLinkType() ); // change flex framework linkage
         context.put( "pureActionscriptProject", pureActionscriptProject );
         context.put( "moduleFiles", moduleFiles );
+		context.put( "hasANE", hasANE );
         
         context.put( "mobileProject", mobileProject );
 
@@ -1319,12 +1326,12 @@ public class FlexbuilderMojo
         super.fillDefaultClasspathContainers( packaging );
 
         if ( ( SWF.equals( packaging ) || SWC.equals( packaging ) || AIR.equals( packaging ) )
-            && enableFlexBuilderBuildCommand )
+            && enableFlexBuilderBuildCommand)
         {
             getBuildcommands().add( FLEXBUILDER_BUILD_COMMAND );
         }
 
-        if ( AIR.equals( packaging ) && enableFlexBuilderBuildCommand || mobileProject)
+        if (( AIR.equals( packaging ) || SWF.equals( packaging ) ) && mobileProject)
         {
             getBuildcommands().add( AIR_BUILD_COMMAND );
         }
@@ -1497,6 +1504,10 @@ public class FlexbuilderMojo
         {
             IdeDependency dep = dependencies[i];
 
+			if(ANE.equals( dep.getType() )){
+				hasANE = true;
+			}
+			
             // Include only swc and rb.swc types
             if ( SWC.equals( dep.getType() ) || RB_SWC.equals( dep.getType() ) || ANE.equals( dep.getType() ) )
             {

@@ -29,7 +29,7 @@
 
   <groupId>net.flexmojos.oss</groupId>
   <artifactId>flexmojos-parent</artifactId>
-  <version>5.1-vostu-SNAPSHOT</version>
+  <version>5.2-vostu-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Flexmojos Parent</name>
@@ -44,6 +44,7 @@
     <maven>${maven.version}</maven>
   </prerequisites>
 
+  
   <distributionManagement>
     <repository>
       <id>ossrh</id>
@@ -54,7 +55,7 @@
       <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
   </distributionManagement>
-
+  
   <repositories>
     <repository>
       <id>rso</id>
@@ -92,7 +93,7 @@
 		<plugin>
           <groupId>net.flexmojos.oss</groupId>
           <artifactId>flexmojos-maven-plugin</artifactId>
-		  <version>5.1-vostu-SNAPSHOT</version>
+		  <version>5.2-vostu-SNAPSHOT</version>
 		</plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
